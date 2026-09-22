@@ -1,0 +1,68 @@
+HW2.5 run log. One block per command executed against the GPU. Every measurement file carries the GPU UUID below.
+
+GPU:            NVIDIA GeForce RTX 5090
+GPU UUID:       GPU-a3a60fad-ef40-08fa-3eb7-9c22d773bd54
+                (JSONL records store it without the "GPU-" prefix: a3a60fad-ef40-08fa-3eb7-9c22d773bd54)
+Workstation:    ISB 840, machine 36
+Reservation ID: -
+Environment:    Windows, WDDM driver 610.60, CUDA (driver) 13.3, Python 3.11.16, torch 2.11.0+cu128 (CUDA runtime 12.8)
+Seed:           SID4 = 1384 was set in the notebook process; the benchmark script ran as a subprocess and did not
+                receive it, so the benchmark tensors were not seeded. The reported timing and memory numbers do not
+                materially depend on the random tensor values.
+
+NOTE ON TIMESTAMPS: per-command start/end times were not captured live. Times below are reconstructed from the
+nvidia-smi -q timestamp (Tue Sep 15 18:54:18 2026 local, PDT = 2026-09-16 01:54:18 UTC) and the output files'
+modification times, and are approximate (to within a few seconds). The precision, bandwidth and attention commands
+were each invoked twice (their result files contain two appended runs); the reconstructed times reflect the final
+invocation, and the time of the first invocation was not recorded.
+
+===============================================================================
+Command:        nvidia-smi -q   (notebook cell; written to results/nvidia-smi-q.txt)
+Start/end UTC:  2026-09-16 01:54:18
+GPU-hours:      ~0 (query only)
+Output:         results/nvidia-smi-q.txt
+
+===============================================================================
+Command:        python benchmark_hw2_5.py precision
+                (defaults: --sizes 1024 4096 8192 16384 --repetitions 10; 5 reps for N >= 8192)
+Start/end UTC:  ~2026-09-16 01:54:18 to 01:54:32
+GPU-hours:      ~0.004
+Output:         results/precision.jsonl (32 rows = 4 sizes x 4 precisions x 2 invocations)
+
+===============================================================================
+Command:        python benchmark_hw2_5.py bandwidth
+                (defaults: --elements 268435456 --matmul-size 8192 --repetitions 10)
+Start/end UTC:  ~2026-09-16 01:54:32 to 01:54:34
+GPU-hours:      ~0.001
+Output:         results/roofline.jsonl (4 rows = add + matmul x 2 invocations)
+
+===============================================================================
+Command:        python benchmark_hw2_5.py attention
+                (defaults: --sizes 512 1024 2048 4096 8192 16384 --head-dim 128 --batch 1 --repetitions 3)
+Start/end UTC:  ~2026-09-16 01:54:34 to 01:54:38
+GPU-hours:      ~0.001
+Output:         results/attention.jsonl (24 rows = naive/fused x 6 lengths x 2 invocations)
+Notes:          No OOM in the tested range; OOM boundaries not located (see METRICS.md Part D).
+
+===============================================================================
+Command:        python benchmark_hw2_5.py thermal
+                (defaults: --duration 1200 --interval 5 --matmul-size 8192)
+Start/end UTC:  ~2026-09-16 01:54:38 to 02:14:40
+GPU-hours:      0.334 (1200 s continuous load)
+Output:         results/thermal.csv (241 samples at 5 s)
+
+===============================================================================
+Command:        python benchmark_hw2_5.py plot
+Start/end UTC:  ~2026-09-16 02:14:40 to 02:14:46
+GPU-hours:      ~0 (plotting only)
+Output:         results/precision_tflops.png, results/attention_memory.png,
+                results/thermal_clock_temperature.png, results/attention_fit.txt; copies in figures/
+Notes:          attention_fit.txt fits naive and fused rows together (harness bug) and is superseded by the
+                naive-only fit reported in METRICS.md Part D. The refit was computed offline from
+                results/attention.jsonl; no additional GPU time was used.
+
+===============================================================================
+Not executed (no GPU time consumed): FP8 attempt (Part B) and attention OOM-boundary search (Part D).
+Code for both exists in HW2_5_GPU_Assignment_documented.ipynb but was never run.
+
+TOTAL consumed: approximately 0.34 GPU-hours on GPU-a3a60fad-ef40-08fa-3eb7-9c22d773bd54.
