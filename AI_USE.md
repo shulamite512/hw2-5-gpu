@@ -6,9 +6,8 @@ No AI tool executed anything on the GPU, and no measurement in this repository w
 
 ## Original harness and notebook
 
-[EDIT BEFORE SUBMITTING — keep the one sentence that is true:]
+
 - `benchmark_hw2_5.py` and `HW2_5_GPU_Assignment.ipynb` were written with AI assistance, and I reviewed and ran them.
-- `benchmark_hw2_5.py` and `HW2_5_GPU_Assignment.ipynb` were written by me without AI assistance.
 
 ## Claude Code
 
